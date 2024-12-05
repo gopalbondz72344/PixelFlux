@@ -88,9 +88,10 @@ export async function POST(req: Request) {
     if (eventType === "user.updated") {
         const { id, image_url, first_name, last_name, username } = evt.data;
 
+        // Ensure firstName and lastName are not null
         const user = {
-            firstName: first_name,
-            lastName: last_name,
+            firstName: first_name ?? "", // Fallback to empty string if null
+            lastName: last_name ?? "",   // Fallback to empty string if null
             username: username!,
             photo: image_url,
         };
@@ -100,14 +101,20 @@ export async function POST(req: Request) {
         return NextResponse.json({ message: "OK", user: updatedUser });
     }
 
-    // DELETE
+// DELETE
     if (eventType === "user.deleted") {
         const { id } = evt.data;
 
-        const deletedUser = await deleteUser(id!);
+        // Handle missing id gracefully
+        if (!id) {
+            return new Response("Error: Missing user id", { status: 400 });
+        }
+
+        const deletedUser = await deleteUser(id);
 
         return NextResponse.json({ message: "OK", user: deletedUser });
     }
+
 
     console.log(`Webhook with and ID of ${id} and type of ${eventType}`);
     console.log("Webhook body:", body);
