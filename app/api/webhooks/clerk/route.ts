@@ -56,17 +56,16 @@ export async function POST(req: Request) {
     const { id } = evt.data;
     const eventType = evt.type;
 
-    // CREATE
+    //CREATE
     if (eventType === "user.created") {
         const { id, email_addresses, image_url, first_name, last_name, username } = evt.data;
 
-        // Provide fallback for null values (if applicable)
         const user = {
             clerkId: id,
             email: email_addresses[0].email_address,
             username: username!,
-            firstName: first_name ?? "",  // Fallback to empty string if null
-            lastName: last_name ?? "",    // Fallback to empty string if null
+            firstName: first_name ?? "", // Fallback to empty string if null
+            lastName: last_name ?? "",   // Fallback to empty string if null
             photo: image_url,
         };
 
@@ -83,6 +82,7 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ message: "OK", user: newUser });
     }
+
 
     // UPDATE
     if (eventType === "user.updated") {
