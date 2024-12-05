@@ -10,22 +10,21 @@ import { createUser, deleteUser, updateUser } from "@/lib/actions/user.actions";
 export async function POST(req: Request) {
     // You can find this in the Clerk Dashboard -> Webhooks -> choose the webhook
     const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
-
     if (!WEBHOOK_SECRET) {
         throw new Error(
             "Please add WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local"
         );
     }
 
-    // Get headers asynchronously
-    const headerPayload = await headers();  // Ensure headers() is awaited
+    // Get the headers
+    const headerPayload = await headers();
     const svix_id = headerPayload.get("svix-id");
     const svix_timestamp = headerPayload.get("svix-timestamp");
     const svix_signature = headerPayload.get("svix-signature");
 
-    // If required headers are missing, respond with an error
+    // If there are no headers, error out
     if (!svix_id || !svix_timestamp || !svix_signature) {
-        return new Response("Error occurred -- missing svix headers", {
+        return new Response("Error occured -- no svix headers", {
             status: 400,
         });
     }
@@ -61,12 +60,13 @@ export async function POST(req: Request) {
     if (eventType === "user.created") {
         const { id, email_addresses, image_url, first_name, last_name, username } = evt.data;
 
+        // Provide fallback for null values (if applicable)
         const user = {
             clerkId: id,
             email: email_addresses[0].email_address,
             username: username!,
-            firstName: first_name,
-            lastName: last_name,
+            firstName: first_name ?? "",  // Fallback to empty string if null
+            lastName: last_name ?? "",    // Fallback to empty string if null
             photo: image_url,
         };
 
