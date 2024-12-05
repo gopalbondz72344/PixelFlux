@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     }
 
     // Get the headers
-    const headerPayload = headers();
+    const headerPayload = await headers();
     const svix_id = headerPayload.get("svix-id");
     const svix_timestamp = headerPayload.get("svix-timestamp");
     const svix_signature = headerPayload.get("svix-signature");
@@ -69,12 +69,13 @@ export async function POST(req: Request) {
             lastName: last_name,
             photo: image_url,
         };
+        const clerk = await clerkClient();
 
         const newUser = await createUser(user);
 
         // Set public metadata
         if (newUser) {
-            await clerkClient.users.updateUserMetadata(id, {
+            await clerk.users.updateUserMetadata(id, {
                 publicMetadata: {
                     userId: newUser._id,
                 },
